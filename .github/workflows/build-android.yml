@@ -57,11 +57,13 @@ jobs:
 
       - name: Generate debug keystore
         run: |
+          rm -f android/app/debug.keystore
           keytool -genkeypair \
             -v -storetype PKCS12 -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass android -keypass android -alias androiddebugkey \
             -keystore android/app/debug.keystore \
-            -dname "CN=Android Debug,O=Android,C=US"
+            -dname "CN=Android Debug,O=Android,C=US" \
+            -noprompt
 
       - name: Create .env
         run: echo "API_BASE_URL=https://somacontrols.com/api" > .env
