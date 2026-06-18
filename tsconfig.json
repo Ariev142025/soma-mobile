@@ -1,5 +1,25 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json",
-  "compilerOptions": { "strict": true },
-  "exclude": ["node_modules", "android", "ios"]
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "lib": [
+      "es2019"
+    ],
+    "allowJs": true,
+    "jsx": "react-native",
+    "noEmit": true,
+    "isolatedModules": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "baseUrl": "."
+  },
+  "exclude": [
+    "node_modules",
+    "android",
+    "ios",
+    "**/__tests__/**"
+  ]
 }
