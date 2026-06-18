@@ -53,6 +53,7 @@ jobs:
           mv android/app/src/main/java/com/somamobilebase android/app/src/main/java/com/somacontrols 2>/dev/null || true
           sed -i "s/SomaMobileBase/SomaMobile/g" android/settings.gradle
           sed -i "s/SomaMobileBase/SomaMobile/g" android/app/src/main/res/values/strings.xml
+          find android -name "*.kt" -exec sed -i "s/SomaMobileBase/SomaMobile/g" {} \;
           echo "Patch selesai"
 
       - name: Generate debug keystore
@@ -191,6 +192,7 @@ jobs:
         run: |
           sed -i "s/com.somamobilebase/com.somacontrols.mobile/g" android/app/build.gradle
           sed -i "s/SomaMobileBase/SomaMobile/g" android/settings.gradle
+          find android -name "*.kt" -exec sed -i "s/SomaMobileBase/SomaMobile/g" {} \;
 
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/soma-release.keystore
