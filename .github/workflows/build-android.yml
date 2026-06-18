@@ -91,12 +91,71 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: soma-mobile-debug-${{ github.sha }}
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
+
+      - name: Deploy APK ke VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: android/app/build/outputs/apk/debug/app-debug.apk
+          target: /var/www/soma-bms/uploads/
+          strip_components: 5
+
+      - name: Rename APK di VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            mv /var/www/soma-bms/uploads/app-debug.apk /var/www/soma-bms/uploads/soma-mobile.apk
+            echo "APK deployed: $(date)"
+
+      - name: Bundle JS untuk OTA
+        run: |
+          npx react-native bundle \
+            --platform android \
+            --dev false \
+            --entry-file index.js \
+            --bundle-output index.android.bundle
+          HASH=$(sha256sum index.android.bundle | awk '{print $1}')
+          echo "BUNDLE_HASH=$HASH" >> $GITHUB_ENV
+
+      - name: Upload JS bundle ke VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: index.android.bundle
+          target: /var/www/soma-bms/uploads/ota/${{ github.sha }}/
+
+      - name: Register OTA release
+        run: |
+          curl -sf -X POST "https://somacontrols.com/api/ota/releases" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "version": "${{ github.sha }}",
+              "platform": "android",
+              "bundleUrl": "https://somacontrols.com/uploads/ota/${{ github.sha }}/index.android.bundle",
+              "bundleHash": "${{ env.BUNDLE_HASH }}",
+              "isMandatory": false,
+              "changelog": "${{ github.event.head_commit.message }}"
+            }' && echo "OTA release terdaftar"
+
+      - name: Summary
+        run: |
+          echo "## Build Selesai" >> $GITHUB_STEP_SUMMARY
+          echo "APK: https://somacontrols.com/uploads/soma-mobile.apk" >> $GITHUB_STEP_SUMMARY
+          echo "OTA: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Hash: ${{ env.BUNDLE_HASH }}" >> $GITHUB_STEP_SUMMARY
 
   build-release:
     runs-on: ubuntu-latest
