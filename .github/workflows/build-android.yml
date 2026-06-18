@@ -106,7 +106,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           source: android/app/build/outputs/apk/debug/app-debug.apk
           target: /var/www/soma-bms/uploads/
-          strip_components: 5
+          strip_components: 6
 
       - name: Rename APK di VPS
         uses: appleboy/ssh-action@master
