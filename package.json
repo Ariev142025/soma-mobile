@@ -41,6 +41,8 @@
     "@react-native/typescript-config": "0.76.5",
     "@types/react": "^18.3.12",
     "typescript": "5.0.4",
-    "eslint": "^8.57.0"
+    "eslint": "^8.57.0",
+    "@react-native-community/cli": "15.0.1",
+    "@react-native-community/cli-platform-android": "15.0.1"
   }
 }
