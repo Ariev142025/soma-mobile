@@ -5,3 +5,4 @@ ios/build/
 .env
 *.keystore
 !android/app/debug.keystore
+android/
