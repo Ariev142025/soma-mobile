@@ -19,7 +19,10 @@ export const useAuthStore=create<AuthStore>((set,get)=>({
   },
   login:async(email,password)=>{
     const {data}=await api.post('/auth/login',{email,password});
-    await Promise.all([StorageService.setTokens(data.accessToken,data.refreshToken),StorageService.setUser(data.user)]);
+    // Support both accessToken dan token (backward compat)
+    const accessToken = data.accessToken ?? data.token;
+    const refreshToken = data.refreshToken ?? data.token;
+    await Promise.all([StorageService.setTokens(accessToken,refreshToken),StorageService.setUser(data.user)]);
     set({user:data.user,isAuthenticated:true});
   },
   logout:async()=>{
